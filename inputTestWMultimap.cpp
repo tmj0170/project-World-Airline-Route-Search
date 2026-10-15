@@ -26,15 +26,15 @@ int main()
     
     while(inputFile >> line){
         cout << line << endl;
-        if(tracker==0){
-            key = line;
-            tracker++;
-        }else{
-            airlineMM.insert({key, line});
-        }
         if(line == "0"){
             tracker--;
-            
+        }else{
+            if(tracker==0){
+                key = line;
+                tracker++;
+            }else{
+                airlineMM.insert({key, line});
+            }
         }
     }
 
