@@ -10,6 +10,7 @@
 using namespace std;
 using Graph = multimap<string, string>;
 
+//Breadth first search for an unweighted graph to find the path with the least layovers between two locations
 void breadthFirstSearch(const Graph& graph, const string& startNode, const string& targetNode) {
     queue<string> q;
     set<string> visited;
@@ -20,6 +21,7 @@ void breadthFirstSearch(const Graph& graph, const string& startNode, const strin
     q.push(startNode);
     visited.insert(startNode);
 
+    //loop to cycle through all the neighbors and extended neighbors of the startNode
     while (!q.empty()) {
         string current = q.front();
         q.pop();
