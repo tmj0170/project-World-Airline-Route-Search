@@ -74,7 +74,7 @@ int main()
 {
 
     multimap<string, string> airlineMM;
-    ifstream inputFile("airlineFlightsBFS.txt");
+    ifstream inputFile("airlineFlights.txt");
     
     //error checking
     if (!inputFile.is_open()) {
