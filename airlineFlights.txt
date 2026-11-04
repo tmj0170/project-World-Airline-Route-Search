@@ -1,7 +1,27 @@
 ﻿AirlineOne LocationOne LocationTwo LocationThree 0 AirlineTwo LocationThree LocationFour 0 AirlineThree LocationOne LocationFour LocationFive LocationSix 0 AirlineFour LocationOne LocationThree 0 AirlineFive LocationFive
-FROM    TO
-AA      BA, LH, AF, EK, QR, QF
-BA      AA, LH, AF, EK, SQ, CX
-LH      AA, BA, AF, UA, SQ, TK
-EK      AA, BA, QR, SQ, QF, LH
-QR      AA, BA, EK, LH, CX, SQ
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <map>
+#include <vector>
+using namespace std;
+
+int main()
+{
+    ifstream fin("airports.txt");
+    map<string, vector<string>> airportMap;
+    string line;
+    getline(fin, line); // Skip column headers
+    while (getline(fin, line))
+    {
+        string origin, destination;
+        stringstream ss(line);
+        getline(ss, origin, ',');
+        getline(ss, destination, ',');
+        airportMap[origin].push_back(destination);
+    }
+
+fin.close();
+return 0;
+}
