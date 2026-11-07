@@ -1,1 +1,5 @@
-AirlineOne AirlineTwo AirlineThree 0 AirlineTwo AirlineThree AirlineFour 0 AirlineThree AirlineOne AirlineFour AirlineFive AirlineSix 0 AirlineFour AirlineOne AirlineThree 0 AirlineFive AirlineSix
+// NY and CH have no path to DA
+DA  HO AU CH 0
+HO  DA AU 0
+NY  BO CH MI 0
+CH  NY AT 0
