@@ -1,7 +1,5 @@
-﻿AirlineOne LocationOne LocationTwo LocationThree 0 AirlineTwo LocationThree LocationFour 0 AirlineThree LocationOne LocationFour LocationFive LocationSix 0 AirlineFour LocationOne LocationThree 0 AirlineFive LocationFive
-FROM    TO
-AA      BA, LH, AF, EK, QR, QF
-BA      AA, LH, AF, EK, SQ, CX
-LH      AA, BA, AF, UA, SQ, TK
-EK      AA, BA, QR, SQ, QF, LH
-QR      AA, BA, EK, LH, CX, SQ
+DA HO AU CH 0
+HO DA AU 0
+NY BO CH MI 0
+LA SF LV 0
+CH DA NY AT 0
