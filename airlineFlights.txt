@@ -1,5 +1,5 @@
+//everything connects 
 DA HO AU CH 0
 HO DA AU 0
 NY BO CH MI 0
-LA SF LV 0
 CH DA NY AT 0
