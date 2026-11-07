@@ -51,8 +51,8 @@ deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNod
     deque<string> pathDeque;
     if(!found){
         //error checking
-        pathDeque.push_back("There is no valid path between the two locations.");
-        //cout << "There is no valid path between the two locations.";
+        //pathDeque.push_back("There is no valid path between the two locations.");
+        cout << "There is no valid path between the two locations.";
     }else{
         //reconstructing the BFS path to only include relevant nodes
         //vector<string> path;
@@ -63,28 +63,51 @@ deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNod
             pathTrack = tracker[pathTrack];
         }
         //printing the found path
-        //path.push_back(startNode);
         pathDeque.push_front(startNode);
-        
-        //for(int i = path.size() - 1; i >= 0; i--){
-        //    cout << path[i];
-        //    if(i!=0){
-        //        cout << " -> ";
-        //    }
-        //}
-    }
-    for (int i = 0; i < pathDeque.size(); i++) {
+        for (int i = 0; i < pathDeque.size(); i++) {
             cout << pathDeque[i];
             if (i != pathDeque.size() - 1) {
                 cout << " -> ";
             }
+        }
     }
     cout << endl << endl;
     return pathDeque;
 }
 
-void smallestRouteWithTwoStops(const std::string& A, const std::string& B, const std::string& C, const std::string& D) {
+// Find the route with the shortest number of connections from location A to location D, 
+// through locations B and C (B and C in any order)
+void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const std::string& B, const std::string& C, const std::string& D) {
+    // First, we find the subpaths (A to B/A to C, B to C/C to B, B to D/C to D).
+    // At each of these steps, if neither has a route, we can conclude that no valid path exists.
 
+    // Find the shortest path from A to B and A to C. These should both be exclusive of D, not yet implemented
+    deque<string> AtoB = breadthFirstSearch(graph, A, B);
+    deque<string> AtoC = breadthFirstSearch(graph, A, C);
+    // If there is no path from A to either B or C, no suitable route exists.
+    if(AtoB.empty() && AtoC.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+
+    // Find shortest path from B to C and C to B. These should both be exclusive of A & D, not yet implemented
+    deque<string> BtoC = breadthFirstSearch(graph, B, C);
+    deque<string> CtoB = breadthFirstSearch(graph, C, B);
+    // If there is no path between B and C, no suitable route exists.
+    if(BtoC.empty() && CtoB.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+
+    // Find shortest path from B to D. Should be exclusive of A and C, not yet implemented
+    deque<string> BtoD = breadthFirstSearch(graph, B, D);
+    // Find shortest path from C to D. Should be exclusive of A and B, not yet implemented
+    deque<string> CtoD = breadthFirstSearch(graph, C, D);
+    // If there is no path from B to D and C to D, no suitable route exists.
+    if(BtoD.empty() && CtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
 }
 
 int main()
