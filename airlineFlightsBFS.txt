@@ -1,5 +1,5 @@
 // NY and CH have no path to DA
-DA  HO AU CH 0
-HO  DA AU 0
-NY  BO CH MI 0
-CH  NY AT 0
+DA HO AU CH 0
+HO DA AU 0
+NY BO CH MI 0
+CH NY AT 0
