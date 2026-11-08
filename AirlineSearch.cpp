@@ -1,0 +1,355 @@
+#include <string>
+#include <iostream>
+#include <queue>
+#include <set>
+#include <map>
+#include <fstream>
+#include <deque>
+
+using namespace std;
+
+using Graph = multimap<string, string>;
+
+deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNode, const std::string& targetNode, const set<string>& excludedNodes = {}) {
+    queue<string> q;
+    set<string> visited;
+    map<string, string> tracker;
+    bool found = false;
+
+    // Initializing
+    q.push(startNode);
+    visited.insert(startNode);
+    visited.insert(excludedNodes.begin(), excludedNodes.end());
+
+    //loop to cycle through all the neighbors and extended neighbors of the startNode
+    while (!q.empty()) {
+        string current = q.front();
+        q.pop();
+        
+        //Checking for the targetNode
+        if(current == targetNode){
+            found = true;
+            break;
+        }
+
+        //Get all neighbors of the current node
+        auto range = graph.equal_range(current);
+        for (auto it = range.first; it != range.second; ++it) {
+            string neighbor = it->second;
+            
+            //Checking if neighbor has been visited
+            if (visited.find(neighbor) == visited.end()) {
+                visited.insert(neighbor);
+                tracker[neighbor] = current;
+                q.push(neighbor);
+            }
+        }
+    }
+
+    cout << "Shortest path from " << startNode << " to " << targetNode << " is: ";
+
+    deque<string> pathDeque;
+    if(!found){
+        //error checking
+        cout << "There is no valid path between the two locations.";
+    }else{
+        //reconstructing the BFS path to only include relevant nodes
+        string pathTrack = targetNode;
+        while(pathTrack != startNode){
+            pathDeque.push_front(pathTrack);
+            pathTrack = tracker[pathTrack];
+        }
+        //printing the found path
+        pathDeque.push_front(startNode);
+        for (int i = 0; i < pathDeque.size(); i++) {
+            cout << pathDeque[i];
+            if (i != pathDeque.size() - 1) {
+                cout << " -> ";
+            }
+        }
+    }
+    cout << endl << endl;
+    return pathDeque;
+}
+
+// Find the route with the shortest number of connections from location A to location D, 
+// through locations B and C (B and C in any order)
+void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const std::string& B, const std::string& C, const std::string& D) {
+    // This keeps track of the route so far, preventing additional work
+    deque<string> completeRoute;
+
+    // First, we find the subpaths (A to B/A to C, B to C/C to B, B to D/C to D).
+    // At each of these steps, if neither has a route, we can conclude that no valid path exists.
+
+    // Find the shortest path from A to B. Should be exclusive of C and D, not yet implemented
+    set<string> excludedNodesAtoB = {C, D};
+    deque<string> AtoB = breadthFirstSearch(graph, A, B, excludedNodesAtoB);
+    // Find the shortest path from A to C. Should be exclusive of B and D, not yet implemented
+    set<string> excludedNodesAtoC = {B, D};
+    deque<string> AtoC = breadthFirstSearch(graph, A, C, excludedNodesAtoC);
+    // If there is no path from A to either B or C, no suitable route exists.
+    if(AtoB.empty() && AtoC.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+
+    // Find shortest path from B to C and C to B. These should both be exclusive of A & D, not yet implemented
+    set<string> excludedNodesBtoC = {A, D};
+    deque<string> BtoC = breadthFirstSearch(graph, B, C, excludedNodesBtoC);
+    if (BtoC.empty()) {
+        cout << "No valid path from " << B << " to " << C << "." << endl;
+    }
+    deque<string> CtoB = breadthFirstSearch(graph, C, B, excludedNodesBtoC);
+    // After finding the second pair of subpaths, there are more conditions we can check to rule out suitable paths
+    // If there is no path between B and C, in either direction, no suitable route exists.
+    if(BtoC.empty() && CtoB.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from A to B (exclusive of C), the path has to go through C first. 
+    //If there is also no path from C to B, no suitable route exists.
+    if(AtoB.empty() && CtoB.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from A to C (exclusive of B), the path has to go through B first.
+    // If there is also no path from  B to C, no suitable route exists.
+    if(AtoC.empty() && BtoC.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+
+    // Find shortest path from B to D. Should be exclusive of A and C, not yet implemented
+    set<string> excludedNodesBtoD = {A, C};
+    deque<string> BtoD = breadthFirstSearch(graph, B, D, excludedNodesBtoD);
+    // Find shortest path from C to D. Should be exclusive of A and B, not yet implemented
+    set<string> excludedNodesCtoD = {A, B};
+    deque<string> CtoD = breadthFirstSearch(graph, C, D, excludedNodesCtoD);
+    // If there is no path from B to D and C to D, no suitable route exists.
+    if(BtoD.empty() && CtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from A to C (exclusive of B), C is reached after B. 
+    // If there is also no path from C to D, no suitable route exists.
+    if(AtoC.empty() && CtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from A to B (exclusive of C), B is reached after C.
+    // If there is also no path from B to D, no suitable route exists.
+    if (AtoB.empty() && BtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from B to C (exclusive of A), and a path from C to B, B is reached after C.
+    // If there is also no path from B to D, no suitable route exists.
+    if (BtoC.empty() && BtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from C to B (exclusive of A), and a path from B to C, C is reached after B.
+    // If there is also no path from C to D, no suitable route exists.
+    if (CtoB.empty() && CtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+
+    // At this point, we have all the subpaths. We can now combine them to form the complete route.
+    // Combine the subpaths to form the complete route
+    if(AtoB.empty() || BtoC.empty() || CtoD.empty()){
+        completeRoute.insert(completeRoute.end(), AtoC.begin(), AtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoB.begin(), CtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoD.begin(), BtoD.end());
+    }
+    else if (AtoC.empty() || CtoB.empty() || BtoD.empty()){
+        completeRoute.insert(completeRoute.end(), AtoB.begin(), AtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoC.begin(), BtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoD.begin(), CtoD.end());
+    }
+    else if ((AtoB.size() + BtoC.size() + CtoD.size()) < (AtoC.size() + CtoB.size() + BtoD.size())){
+        completeRoute.insert(completeRoute.end(), AtoB.begin(), AtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoC.begin(), BtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoD.begin(), CtoD.end());
+    }else{
+        completeRoute.insert(completeRoute.end(), AtoC.begin(), AtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoB.begin(), CtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoD.begin(), BtoD.end());
+    }
+
+
+    // Print the complete route
+    if(!completeRoute.empty()){
+        cout << "Shortest route from " << A << " to " << D << " through " << B << " and " << C << ": ";
+        for(const auto& node : completeRoute){
+            cout << node << " ";
+        }
+        cout << endl;
+    }else{
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+    }
+}
+
+void MeetingLocation(const Graph& airline, const string& A, const string& B, const string& C){
+    int totalConnections = airline.size() * 3;
+    string location = "";
+    deque<string> APath;
+    deque<string> BPath;
+    deque<string> CPath;
+    set<string> visited;
+    queue<string> q;
+
+    visited.insert(A);
+    visited.insert(B);
+    visited.insert(C);
+    auto rangeA = airline.equal_range(A);
+    for(auto it = rangeA.first; it != rangeA.second; ++it){
+        string neighbor = it->second;
+        if(neighbor!=B && neighbor !=C) {
+            q.push(neighbor);
+            visited.insert(neighbor);
+        }
+    }
+    auto rangeB = airline.equal_range(B);
+    for(auto it = rangeB.first; it != rangeB.second; ++it){
+        string neighbor = it->second;
+        if(neighbor!=A && neighbor !=C) {
+            q.push(neighbor);
+            visited.insert(neighbor);
+        }
+    }
+    auto rangeC = airline.equal_range(C);
+    for(auto it = rangeC.first; it != rangeC.second; ++it){
+        string neighbor = it->second;
+        if(neighbor!=B && neighbor !=A) {
+            q.push(neighbor);
+            visited.insert(neighbor);
+        }
+    }
+    
+    set<string> excludedNodesA = {B, C};
+    set<string> excludedNodesB = {A, C};
+    set<string> excludedNodesC = {A, B};
+    while (!q.empty()) {
+        string node = q.front();
+        q.pop();
+        deque<string> pathA = breadthFirstSearch(airline, A, node, excludedNodesA);
+        deque<string> pathB = breadthFirstSearch(airline, B, node, excludedNodesB);
+        deque<string> pathC = breadthFirstSearch(airline, C, node, excludedNodesC);
+        if (!pathA.empty() && !pathB.empty() && !pathC.empty()) {
+            int numConnections = pathA.size() + pathB.size() + pathC.size() - 3;
+            if (numConnections < totalConnections) {
+                totalConnections = numConnections;
+                location = node;
+                APath = pathA;
+                BPath = pathB;
+                CPath = pathC;
+            }
+        }
+
+        auto range = airline.equal_range(node);
+        for(auto it = range.first; it != range.second; ++it){
+            string neighbor = it->second;
+            if(visited.find(neighbor) == visited.end()) {
+                q.push(neighbor);
+                visited.insert(neighbor);
+            }
+        }
+    }
+
+    if (location == "") {
+        cout << "No valid meeting location accessed from " << A << ", " << B << " and " << C << endl;
+        return;
+    }
+    else {
+        cout << "Optimal meeting location: " << location << endl;
+        cout << "Path from " << A << ": ";
+        for (const string& node : APath) {
+            cout << node << " ";
+        }
+        cout << endl;
+        cout << "Path from " << B << ": ";
+        for (const string& node : BPath) {
+            cout << node << " ";
+        }
+        cout << endl;
+        cout << "Path from " << C << ": ";
+        for (const string& node : CPath) {
+            cout << node << " ";
+        }
+        cout << endl;
+
+    }
+    
+}
+
+int main()
+{
+
+    multimap<string, string> airlineMM;
+    ifstream inputFile("airlineFlightsBFS.txt");
+    
+    //error checking
+    if (!inputFile.is_open()) {
+        cerr << "Error: Could not open the file!" << endl;
+        return 1;
+    }
+    
+    string line;
+    string key;
+    int tracker = 0;
+    
+    //Organizing airline data into a multimap
+    while(inputFile >> line){
+        /*commented for testbench purposes
+        cout << line << endl; */
+        if(line == "0"){
+            tracker--;
+        }else{
+            if(tracker==0){
+                key = line;
+                tracker++;
+            }else{
+                airlineMM.insert({key, line});
+            }
+        }
+    }
+
+    // Printing the keys and their respective values
+    //Set to comment for testbench purposes
+    cout << "Airline Multimap: " << endl;
+    
+    
+    auto it = airlineMM.begin();
+    while (it != airlineMM.end()) {
+        const string& startKey = it->first;
+        cout << startKey << ": ";
+
+        while (it != airlineMM.end() && it->first == startKey) {
+            cout << it->second << " ";
+            ++it;
+        }
+        cout << '\n';
+    }
+
+    //smallestRouteWithTwoStops(airlineMM, "AirlineOne", "AirlineTwo", "AirlineThree", "AirlineFour");
+    //expected: AirlineOne -> AirlineTwo -> AirlineThree -> AirlineFour
+
+    //To test no valid path from A to B or C
+    smallestRouteWithTwoStops(airlineMM, "AirlineSix", "AirlineOne", "AirlineThree", "AirlineFour");
+    //expected: No valid path from AirlineSix to AirlineFour through AirlineOne and AirlineThree
+
+    //To test no path from B to C or C to B, exclusive of A and D, after there being a path from A to B and A to C
+    smallestRouteWithTwoStops(airlineMM, "AirlineThree", "AirlineFive", "AirlineFour", "AirlineOne");
+    //expected: No valid path from AirlineThree to AirlineOne through AirlineFive and AirlineFour
+
+    //To test no path from C to D (exclusive of B) or B to D (exclusive of C), both exclusive of A, after there being a path from A to B or A to C and a path between B and C
+    smallestRouteWithTwoStops(airlineMM, "AirlineThree", "AirlineFive", "AirlineSix", "AirlineFour");
+    //expected: No valid path from AirlineThree to AirlineFour through AirlineFive and AirlineSix
+
+    //To test no path from A to B (exclusive of C) or C to B (exclusive of A)
+    smallestRouteWithTwoStops(airlineMM, "AirlineFive", "AirlineTwo", "AirlineSix", "AirlineFour");
+    //expected: No valid path from AirlineFive to AirlineFour through AirlineTwo and AirlineSix
+
+    return 0;
+}
