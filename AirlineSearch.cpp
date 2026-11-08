@@ -10,7 +10,7 @@ using namespace std;
 
 using Graph = multimap<string, string>;
 
-deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNode, const std::string& targetNode) {
+deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNode, const std::string& targetNode, const set<string>& excludedNodes = {}) {
     queue<string> q;
     set<string> visited;
     map<string, string> tracker;
@@ -19,6 +19,7 @@ deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNod
     // Initializing
     q.push(startNode);
     visited.insert(startNode);
+    visited.insert(excludedNodes.begin(), excludedNodes.end());
 
     //loop to cycle through all the neighbors and extended neighbors of the startNode
     while (!q.empty()) {
@@ -85,20 +86,30 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
     // At each of these steps, if neither has a route, we can conclude that no valid path exists.
 
     // Find the shortest path from A to B. Should be exclusive of C and D, not yet implemented
-    deque<string> AtoB = breadthFirstSearch(graph, A, B);
+    set<string> excludedNodesAtoB = {C, D};
+    deque<string> AtoB = breadthFirstSearch(graph, A, B, excludedNodesAtoB);
     // Find the shortest path from A to C. Should be exclusive of B and D, not yet implemented
-    deque<string> AtoC = breadthFirstSearch(graph, A, C);
+    set<string> excludedNodesAtoC = {B, D};
+    deque<string> AtoC = breadthFirstSearch(graph, A, C, excludedNodesAtoC);
+    if (AtoC.empty()) {
+        cout << "No valid path from " << A << " to " << C << "." << endl;
+    }
     // If there is no path from A to either B or C, no suitable route exists.
-    // If there is no path from A to B, that means there is no path from C to B, if there is a path from A to C.
-    // Vise versa, if there is no path from A to C, that means there is no path from B to C, if there is a path from A to B.
-    if(AtoB.empty() || AtoC.empty()){
+    if(AtoB.empty() && AtoC.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
     }
 
     // Find shortest path from B to C and C to B. These should both be exclusive of A & D, not yet implemented
-    deque<string> BtoC = breadthFirstSearch(graph, B, C);
-    deque<string> CtoB = breadthFirstSearch(graph, C, B);
+    set<string> excludedNodesBtoC = {A, D};
+    deque<string> BtoC = breadthFirstSearch(graph, B, C, excludedNodesBtoC);
+    if (BtoC.empty()) {
+        cout << "No valid path from " << B << " to " << C << "." << endl;
+    }
+    deque<string> CtoB = breadthFirstSearch(graph, C, B, excludedNodesBtoC);
+    if (AtoB.empty()) {
+        cout << "No valid path from " << A << " to " << B << "." << endl;
+    }
     // After finding the second pair of subpaths, there are more conditions we can check to rule out suitable paths
     // If there is no path between B and C, in either direction, no suitable route exists.
     // Unlike from A to B or A to C, since the graph is directed, it doesn't need to be possible to travel from B to C and from C to B. 
@@ -106,11 +117,25 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
     }
+    // If there is no path from A to B (exclusive of C), the path has to go through C first. 
+    //If there is also no path from C to B, no suitable route exists.
+    if(AtoB.empty() && CtoB.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from A to C (exclusive of B), the path has to go through B first.
+    // If there is also no path from  B to C, no suitable route exists.
+    if(AtoC.empty() && BtoC.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
 
     // Find shortest path from B to D. Should be exclusive of A and C, not yet implemented
-    deque<string> BtoD = breadthFirstSearch(graph, B, D);
+    set<string> excludedNodesBtoD = {A, C};
+    deque<string> BtoD = breadthFirstSearch(graph, B, D, excludedNodesBtoD);
     // Find shortest path from C to D. Should be exclusive of A and B, not yet implemented
-    deque<string> CtoD = breadthFirstSearch(graph, C, D);
+    set<string> excludedNodesCtoD = {A, B};
+    deque<string> CtoD = breadthFirstSearch(graph, C, D, excludedNodesCtoD);
     // If there is no path from B to D and C to D, no suitable route exists.
     if(BtoD.empty() && CtoD.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
@@ -205,15 +230,15 @@ int main()
     }
     
      
-    breadthFirstSearch(airlineMM, "AirlineOne", "AirlineTwo");
+    //breadthFirstSearch(airlineMM, "AirlineOne", "AirlineTwo");
     //expected: AirlineOne -> AirlineTwo
-    breadthFirstSearch(airlineMM, "AirlineTwo", "AirlineOne");
+    //breadthFirstSearch(airlineMM, "AirlineTwo", "AirlineOne");
     //expected: AirlineTwo -> AirlineThree -> AirlineOne
-    breadthFirstSearch(airlineMM, "AirlineThree", "AirlineSix");
+    //breadthFirstSearch(airlineMM, "AirlineThree", "AirlineSix");
     //expected: AirlineThree -> AirlineSix
-    breadthFirstSearch(airlineMM, "AirlineFour", "AirlineFour");
+    //breadthFirstSearch(airlineMM, "AirlineFour", "AirlineFour");
     //expected: AirlineFour
-    breadthFirstSearch(airlineMM, "AirlineFive", "AirlineThree");
+    //breadthFirstSearch(airlineMM, "AirlineFive", "AirlineThree");
     //expected: No valid path
 
     smallestRouteWithTwoStops(airlineMM, "AirlineOne", "AirlineTwo", "AirlineThree", "AirlineFour");
