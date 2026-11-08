@@ -27,7 +27,7 @@ bool hasFlight(const Graph& graph, const string& from,
 }
 
 // DFS with backtracking to find the best round trip
-void findBestRoute(
+void Depthfirstsearch(
     const Graph& graph,
     const string& current,
     const string& start,
@@ -66,7 +66,7 @@ void findBestRoute(
             visited.insert(neighbor);
             currentPath.push_back(neighbor);
 
-            findBestRoute(
+            Depthfirstsearch(
                 graph,
                 neighbor,
                 start,
@@ -137,7 +137,7 @@ int main() {
     visited.insert(start);
     currentPath.push_back(start);
 
-    findBestRoute(
+    Depthfirstsearch(
         airlineMM,
         start,
         start,
