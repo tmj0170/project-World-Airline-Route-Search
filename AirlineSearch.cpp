@@ -78,14 +78,20 @@ deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNod
 // Find the route with the shortest number of connections from location A to location D, 
 // through locations B and C (B and C in any order)
 void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const std::string& B, const std::string& C, const std::string& D) {
+    // This keeps track of the route so far, preventing additional work
+    deque<string> completeRoute;
+
     // First, we find the subpaths (A to B/A to C, B to C/C to B, B to D/C to D).
     // At each of these steps, if neither has a route, we can conclude that no valid path exists.
 
-    // Find the shortest path from A to B and A to C. These should both be exclusive of D, not yet implemented
+    // Find the shortest path from A to B. Should be exclusive of C and D, not yet implemented
     deque<string> AtoB = breadthFirstSearch(graph, A, B);
+    // Find the shortest path from A to C. Should be exclusive of B and D, not yet implemented
     deque<string> AtoC = breadthFirstSearch(graph, A, C);
     // If there is no path from A to either B or C, no suitable route exists.
-    if(AtoB.empty() && AtoC.empty()){
+    // If there is no path from A to B, that means there is no path from C to B, if there is a path from A to C.
+    // Vise versa, if there is no path from A to C, that means there is no path from B to C, if there is a path from A to B.
+    if(AtoB.empty() || AtoC.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
     }
@@ -93,7 +99,9 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
     // Find shortest path from B to C and C to B. These should both be exclusive of A & D, not yet implemented
     deque<string> BtoC = breadthFirstSearch(graph, B, C);
     deque<string> CtoB = breadthFirstSearch(graph, C, B);
-    // If there is no path between B and C, no suitable route exists.
+    // After finding the second pair of subpaths, there are more conditions we can check to rule out suitable paths
+    // If there is no path between B and C, in either direction, no suitable route exists.
+    // Unlike from A to B or A to C, since the graph is directed, it doesn't need to be possible to travel from B to C and from C to B. 
     if(BtoC.empty() && CtoB.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
@@ -107,6 +115,43 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
     if(BtoD.empty() && CtoD.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
+    }
+    // If there is a path from A to C, but no path from B to C and B to D, no suitable route exists.
+    if(BtoC.empty() && BtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+
+    // At this point, we have all the subpaths. We can now combine them to form the complete route.
+    // Combine the subpaths to form the complete route
+    if ((AtoB.size() + BtoC.size() + CtoD.size()) < AtoC.size() + CtoB.size() + BtoD.size()){
+        completeRoute.insert(completeRoute.end(), AtoB.begin(), AtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoC.begin(), BtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoD.begin(), CtoD.end());
+    }else{
+        completeRoute.insert(completeRoute.end(), AtoC.begin(), AtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoB.begin(), CtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoD.begin(), BtoD.end());
+    }
+    //if(!AtoB.empty() && !BtoC.empty() && !CtoD.empty()){
+    //    completeRoute.insert(completeRoute.end(), AtoB.begin(), AtoB.end());
+    //    completeRoute.insert(completeRoute.end(), BtoC.begin(), BtoC.end());
+    //    completeRoute.insert(completeRoute.end(), CtoD.begin(), CtoD.end());
+    //}else if(!AtoC.empty() && !CtoB.empty() && !BtoD.empty()){
+    //    completeRoute.insert(completeRoute.end(), AtoC.begin(), AtoC.end());
+    //    completeRoute.insert(completeRoute.end(), CtoB.begin(), CtoB.end());
+    //    completeRoute.insert(completeRoute.end(), BtoD.begin(), BtoD.end());
+    //}
+
+    // Print the complete route
+    if(!completeRoute.empty()){
+        cout << "Shortest route from " << A << " to " << D << " through " << B << " and " << C << ": ";
+        for(const auto& node : completeRoute){
+            cout << node << " ";
+        }
+        cout << endl;
+    }else{
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
     }
 }
 
@@ -143,7 +188,7 @@ int main()
     }
 
     // Printing the keys and their respective values
-    /*Set to comment for testbench purposes
+    //Set to comment for testbench purposes
     cout << "Airline Multimap: " << endl;
     
     
@@ -159,7 +204,7 @@ int main()
         cout << '\n';
     }
     
-    */ 
+     
     breadthFirstSearch(airlineMM, "AirlineOne", "AirlineTwo");
     //expected: AirlineOne -> AirlineTwo
     breadthFirstSearch(airlineMM, "AirlineTwo", "AirlineOne");
@@ -170,6 +215,9 @@ int main()
     //expected: AirlineFour
     breadthFirstSearch(airlineMM, "AirlineFive", "AirlineThree");
     //expected: No valid path
+
+    smallestRouteWithTwoStops(airlineMM, "AirlineOne", "AirlineTwo", "AirlineThree", "AirlineFour");
+    //expected: AirlineOne -> AirlineTwo -> AirlineThree -> AirlineFour
 
     return 0;
 }
