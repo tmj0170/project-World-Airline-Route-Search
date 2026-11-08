@@ -1,8 +1,8 @@
-// NY and CH have no path to DA
+// NY, CH, and MI have no path to DA and UY 
 DA HO AU CH 0
-HO DA AU 0
+HO DA AU UY 0
 NY BO CH MI 0
-CH DA NY AT 0
+CH NY AT 0
 AU NY AT MI 0
-MI CH BO UY 0
-UY DA HO MI 0
+MI CH BO 0
+UY DA HO AT 0
