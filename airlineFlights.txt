@@ -1,4 +1,3 @@
-//everything connects 
 DA HO AU CH 0
 HO DA AU 0
 NY BO CH MI 0
