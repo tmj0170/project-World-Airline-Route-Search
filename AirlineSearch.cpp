@@ -51,14 +51,11 @@ deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNod
     deque<string> pathDeque;
     if(!found){
         //error checking
-        //pathDeque.push_back("There is no valid path between the two locations.");
         cout << "There is no valid path between the two locations.";
     }else{
         //reconstructing the BFS path to only include relevant nodes
-        //vector<string> path;
         string pathTrack = targetNode;
         while(pathTrack != startNode){
-            //path.push_back(pathTrack);
             pathDeque.push_front(pathTrack);
             pathTrack = tracker[pathTrack];
         }
@@ -182,15 +179,7 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
         completeRoute.insert(completeRoute.end(), CtoB.begin(), CtoB.end()-1);
         completeRoute.insert(completeRoute.end(), BtoD.begin(), BtoD.end());
     }
-    //if(!AtoB.empty() && !BtoC.empty() && !CtoD.empty()){
-    //    completeRoute.insert(completeRoute.end(), AtoB.begin(), AtoB.end());
-    //    completeRoute.insert(completeRoute.end(), BtoC.begin(), BtoC.end());
-    //    completeRoute.insert(completeRoute.end(), CtoD.begin(), CtoD.end());
-    //}else if(!AtoC.empty() && !CtoB.empty() && !BtoD.empty()){
-    //    completeRoute.insert(completeRoute.end(), AtoC.begin(), AtoC.end());
-    //    completeRoute.insert(completeRoute.end(), CtoB.begin(), CtoB.end());
-    //    completeRoute.insert(completeRoute.end(), BtoD.begin(), BtoD.end());
-    //}
+
 
     // Print the complete route
     if(!completeRoute.empty()){
@@ -252,21 +241,21 @@ int main()
         }
         cout << '\n';
     }
-    
-     
-    //breadthFirstSearch(airlineMM, "AirlineOne", "AirlineTwo");
-    //expected: AirlineOne -> AirlineTwo
-    //breadthFirstSearch(airlineMM, "AirlineTwo", "AirlineOne");
-    //expected: AirlineTwo -> AirlineThree -> AirlineOne
-    //breadthFirstSearch(airlineMM, "AirlineThree", "AirlineSix");
-    //expected: AirlineThree -> AirlineSix
-    //breadthFirstSearch(airlineMM, "AirlineFour", "AirlineFour");
-    //expected: AirlineFour
-    //breadthFirstSearch(airlineMM, "AirlineFive", "AirlineThree");
-    //expected: No valid path
 
-    smallestRouteWithTwoStops(airlineMM, "AirlineOne", "AirlineTwo", "AirlineThree", "AirlineFour");
+    //smallestRouteWithTwoStops(airlineMM, "AirlineOne", "AirlineTwo", "AirlineThree", "AirlineFour");
     //expected: AirlineOne -> AirlineTwo -> AirlineThree -> AirlineFour
+
+    //To test no valid path from A to B or C
+    smallestRouteWithTwoStops(airlineMM, "AirlineSix", "AirlineOne", "AirlineThree", "AirlineFour");
+    //expected: No valid path from AirlineSix to AirlineFour through AirlineOne and AirlineThree
+
+    //To test no path from B to C or C to B, exclusive of A and D, after there being a path from A to B and A to C
+    smallestRouteWithTwoStops(airlineMM, "AirlineThree", "AirlineFive", "AirlineFour", "AirlineOne");
+    //expected: No valid path from AirlineThree to AirlineOne through AirlineFive and AirlineFour
+
+    //To test no path from C to D (exclusive of B) or B to D (exclusive of C), both exclusive of A, after there being a path from A to B or A to C and a path between B and C
+    smallestRouteWithTwoStops(airlineMM, "AirlineThree", "AirlineFive", "AirlineSix", "AirlineFour");
+    //expected: No valid path from AirlineThree to AirlineFour through AirlineFive and AirlineSix
 
     return 0;
 }
