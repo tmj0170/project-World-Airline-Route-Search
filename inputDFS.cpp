@@ -123,7 +123,6 @@ int main() {
     inputFile.close();
     
     string start = "DA";
-    cin >> start;
 
     if (allLocations.find(start) == allLocations.end()) {
         cout << "Starting location does not exist." << endl;
