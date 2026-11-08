@@ -45,10 +45,9 @@ deque<string> breadthFirstSearch(const Graph& graph, const std::string& startNod
             }
         }
     }
-    
+
     cout << "Shortest path from " << startNode << " to " << targetNode << " is: ";
-    
-    //vector<string> path;
+
     deque<string> pathDeque;
     if(!found){
         //error checking
@@ -91,9 +90,6 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
     // Find the shortest path from A to C. Should be exclusive of B and D, not yet implemented
     set<string> excludedNodesAtoC = {B, D};
     deque<string> AtoC = breadthFirstSearch(graph, A, C, excludedNodesAtoC);
-    if (AtoC.empty()) {
-        cout << "No valid path from " << A << " to " << C << "." << endl;
-    }
     // If there is no path from A to either B or C, no suitable route exists.
     if(AtoB.empty() && AtoC.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
@@ -112,7 +108,6 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
     }
     // After finding the second pair of subpaths, there are more conditions we can check to rule out suitable paths
     // If there is no path between B and C, in either direction, no suitable route exists.
-    // Unlike from A to B or A to C, since the graph is directed, it doesn't need to be possible to travel from B to C and from C to B. 
     if(BtoC.empty() && CtoB.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
@@ -141,15 +136,44 @@ void smallestRouteWithTwoStops(const Graph& graph, const std::string& A, const s
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
     }
-    // If there is a path from A to C, but no path from B to C and B to D, no suitable route exists.
-    if(BtoC.empty() && BtoD.empty()){
+    // If there is no path from A to C (exclusive of B), C is reached after B. 
+    // If there is also no path from C to D, no suitable route exists.
+    if(AtoC.empty() && CtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from A to B (exclusive of C), B is reached after C.
+    // If there is also no path from B to D, no suitable route exists.
+    if (AtoB.empty() && BtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from B to C (exclusive of A), and a path from C to B, B is reached after C.
+    // If there is also no path from B to D, no suitable route exists.
+    if (BtoC.empty() && BtoD.empty()){
+        cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
+        return;
+    }
+    // If there is no path from C to B (exclusive of A), and a path from B to C, C is reached after B.
+    // If there is also no path from C to D, no suitable route exists.
+    if (CtoB.empty() && CtoD.empty()){
         cout << "No valid path from " << A << " to " << D << " through " << B << " and " << C << "." << endl;
         return;
     }
 
     // At this point, we have all the subpaths. We can now combine them to form the complete route.
     // Combine the subpaths to form the complete route
-    if ((AtoB.size() + BtoC.size() + CtoD.size()) < AtoC.size() + CtoB.size() + BtoD.size()){
+    if(AtoB.empty() || BtoC.empty() || CtoD.empty()){
+        completeRoute.insert(completeRoute.end(), AtoC.begin(), AtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoB.begin(), CtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoD.begin(), BtoD.end());
+    }
+    else if (AtoC.empty() || CtoB.empty() || BtoD.empty()){
+        completeRoute.insert(completeRoute.end(), AtoB.begin(), AtoB.end()-1);
+        completeRoute.insert(completeRoute.end(), BtoC.begin(), BtoC.end()-1);
+        completeRoute.insert(completeRoute.end(), CtoD.begin(), CtoD.end());
+    }
+    else if ((AtoB.size() + BtoC.size() + CtoD.size()) < (AtoC.size() + CtoB.size() + BtoD.size())){
         completeRoute.insert(completeRoute.end(), AtoB.begin(), AtoB.end()-1);
         completeRoute.insert(completeRoute.end(), BtoC.begin(), BtoC.end()-1);
         completeRoute.insert(completeRoute.end(), CtoD.begin(), CtoD.end());
